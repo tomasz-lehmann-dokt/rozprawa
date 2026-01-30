@@ -5,7 +5,8 @@ Implements training with mixed precision, cosine annealing, and validation.
 
 Architectures:
 - ConvNeXt-MLP: ConvNeXt backbone + MLP parameter encoder
-- dual-Xception: Xception backbone + MLP parameter encoder
+- dual-Xception: Xception backbone (timm) + MLP parameter encoder
+- dual-Xception-v2: Two Xception backbones (pretrainedmodels), params as spatial maps
 """
 
 import argparse
@@ -24,7 +25,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from model import ConvNeXtMLP
-from model_xception import DualXception
+from model_xception import DualXception, DualXceptionV2
 from dataset import KonIQDataset
 from metrics import compute_correlation_metrics
 
@@ -185,10 +186,15 @@ def main(args: argparse.Namespace) -> None:
     elif args.model == "xception":
         model = DualXception().to(device)
         model_name = "dual_xception"
+    elif args.model == "xception_v2":
+        model = DualXceptionV2().to(device)
+        model_name = "dual_xception_v2"
     else:
         raise ValueError(f"Unknown model: {args.model}")
 
-    print(f"Model: {model_name}, Parameters: {sum(p.numel() for p in model.parameters()):,}")
+    print(
+        f"Model: {model_name}, Parameters: {sum(p.numel() for p in model.parameters()):,}"
+    )
 
     criterion = nn.MSELoss()
     optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
@@ -206,13 +212,15 @@ def main(args: argparse.Namespace) -> None:
 
         print(f"\nEpoch {epoch}: SROCC={srocc:.4f}, PLCC={plcc:.4f}, RMSE={rmse:.4f}")
 
-        history.append({
-            "epoch": epoch,
-            "train_loss": train_loss,
-            "val_srocc": srocc,
-            "val_plcc": plcc,
-            "val_rmse": rmse,
-        })
+        history.append(
+            {
+                "epoch": epoch,
+                "train_loss": train_loss,
+                "val_srocc": srocc,
+                "val_plcc": plcc,
+                "val_rmse": rmse,
+            }
+        )
 
         if rmse < best_rmse:
             best_rmse = rmse
@@ -235,10 +243,17 @@ def main(args: argparse.Namespace) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train BIQA quality predictor")
     parser.add_argument("--csv_path", type=str, required=True, help="Path to KonIQ CSV")
-    parser.add_argument("--images_dir", type=str, required=True, help="Images directory")
+    parser.add_argument(
+        "--images_dir", type=str, required=True, help="Images directory"
+    )
     parser.add_argument("--checkpoint_dir", type=str, default="checkpoints")
-    parser.add_argument("--model", type=str, default="convnext", choices=["convnext", "xception"],
-                        help="Model architecture: convnext (ConvNeXt-MLP) or xception (dual-Xception)")
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="convnext",
+        choices=["convnext", "xception", "xception_v2"],
+        help="Model: convnext, xception (timm+MLP), xception_v2 (dual backbone)",
+    )
     parser.add_argument("--epochs", type=int, default=60)
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--lr", type=float, default=1e-3)
@@ -247,4 +262,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args.image_size = tuple(args.image_size)
     main(args)
-

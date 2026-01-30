@@ -7,12 +7,28 @@ Predyktor MOS oparty na architekturach ConvNeXt-MLP oraz dual-Xception. Szczegó
 | Plik | Opis |
 |------|------|
 | `model.py` | ConvNeXt-MLP: backbone ConvNeXt + MLP dla parametrów |
-| `model_xception.py` | dual-Xception: backbone Xception + MLP dla parametrów |
+| `model_xception.py` | dual-Xception (dwie wersje): Xception + MLP / dwa Xception backbones |
 | `dataset.py` | Loader KonIQ-10k z podziałem train/valid/test |
 | `features.py` | Ekstrakcja 9 parametrów obrazu |
 | `metrics.py` | SROCC, PLCC, RMSE |
 | `train.py` | Trening z AdamW, CosineAnnealingLR, mixed precision |
 | `evaluate.py` | Ewaluacja na zbiorze testowym |
+
+## Architektury
+
+### ConvNeXt-MLP (`--model convnext`)
+- Backbone: ConvNeXt-Base (timm)
+- Parametry: MLP encoder dla 9 cech obrazu
+
+### dual-Xception (`--model xception`)
+- Backbone: Xception (timm)
+- Parametry: MLP encoder dla 9 cech obrazu
+
+### dual-Xception-v2 (`--model xception_v2`)
+- Dwa osobne backbony Xception (pretrainedmodels)
+- Gałąź obrazu: standardowy Xception (3 kanały)
+- Gałąź parametrów: Xception ze zmodyfikowaną conv1 (4 kanały)
+- Parametry konwertowane do reprezentacji przestrzennej 4-kanałowej
 
 ## Dane
 
@@ -38,10 +54,17 @@ python train.py --csv_path /path/to/koniq10k_scores_and_distributions.csv \
                 --epochs 60 \
                 --batch_size 8
 
-# dual-Xception
+# dual-Xception (timm + MLP)
 python train.py --csv_path /path/to/koniq10k_scores_and_distributions.csv \
                 --images_dir /path/to/1024x768 \
                 --model xception \
+                --epochs 60 \
+                --batch_size 4
+
+# dual-Xception-v2 (dwa backbony Xception)
+python train.py --csv_path /path/to/koniq10k_scores_and_distributions.csv \
+                --images_dir /path/to/1024x768 \
+                --model xception_v2 \
                 --epochs 60 \
                 --batch_size 4
 ```

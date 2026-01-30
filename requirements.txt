@@ -6,6 +6,7 @@ torchmetrics>=0.9.0
 # Backbones
 timm>=0.6.0
 einops>=0.4.0
+pretrainedmodels>=0.7.4
 
 # Image processing
 opencv-python>=4.5.0

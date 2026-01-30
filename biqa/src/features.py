@@ -34,7 +34,7 @@ def compute_sharpness(image: np.ndarray) -> float:
 def compute_colorfulness(image: np.ndarray) -> float:
     """
     Compute colorfulness metric based on opponent color space.
-    
+
     Reference: Hasler & Süsstrunk (2003).
     """
     b, g, r = cv2.split(image.astype(np.float32))
@@ -95,18 +95,19 @@ def extract_all_features(image: np.ndarray) -> np.ndarray:
 
     underexposed, overexposed = compute_exposure(image)
 
-    features = np.array([
-        compute_brightness(image),
-        compute_contrast(image),
-        compute_sharpness(image),
-        compute_colorfulness(image),
-        compute_entropy(image),
-        compute_edge_density(image),
-        compute_saturation(image),
-        underexposed,
-        overexposed,
-    ], dtype=np.float32)
+    features = np.array(
+        [
+            compute_brightness(image),
+            compute_contrast(image),
+            compute_sharpness(image),
+            compute_colorfulness(image),
+            compute_entropy(image),
+            compute_edge_density(image),
+            compute_saturation(image),
+            underexposed,
+            overexposed,
+        ],
+        dtype=np.float32,
+    )
 
     return features
-
-

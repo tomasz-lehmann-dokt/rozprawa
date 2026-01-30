@@ -50,10 +50,12 @@ def evaluate(
             ssim_sum += ssim
             count += 1
 
-            pbar.set_postfix(OrderedDict(
-                psnr=f"{psnr_sum / count:.2f}",
-                ssim=f"{ssim_sum / count:.4f}",
-            ))
+            pbar.set_postfix(
+                OrderedDict(
+                    psnr=f"{psnr_sum / count:.2f}",
+                    ssim=f"{ssim_sum / count:.4f}",
+                )
+            )
 
     return psnr_sum / count, ssim_sum / count
 
@@ -117,7 +119,9 @@ def main(args: argparse.Namespace) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate Attention U-Net")
-    parser.add_argument("--checkpoint", type=str, required=True, help="Model checkpoint")
+    parser.add_argument(
+        "--checkpoint", type=str, required=True, help="Model checkpoint"
+    )
     parser.add_argument("--uhdm_dir", type=str, default="", help="UHDM dataset root")
     parser.add_argument("--tip_dir", type=str, default="", help="TIP2018 dataset root")
     parser.add_argument("--batch_size", type=int, default=1)
@@ -125,5 +129,3 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=str, default="eval_results.csv")
 
     main(parser.parse_args())
-
-

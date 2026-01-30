@@ -79,12 +79,9 @@ class HIDEDataset(Dataset):
         sharp = cv2.resize(sharp, self.image_size)
 
         # HWC -> CHW, normalize to [0, 1]
-        blurred_tensor = torch.from_numpy(
-            np.transpose(blurred, (2, 0, 1))
-        ).float() / 255.0
-        sharp_tensor = torch.from_numpy(
-            np.transpose(sharp, (2, 0, 1))
-        ).float() / 255.0
+        blurred_tensor = (
+            torch.from_numpy(np.transpose(blurred, (2, 0, 1))).float() / 255.0
+        )
+        sharp_tensor = torch.from_numpy(np.transpose(sharp, (2, 0, 1))).float() / 255.0
 
         return blurred_tensor, sharp_tensor
-

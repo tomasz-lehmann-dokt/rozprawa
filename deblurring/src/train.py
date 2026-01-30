@@ -45,9 +45,11 @@ def load_param_stats(path: str) -> Dict[str, np.ndarray]:
 
 def create_feature_fn(param_stats: Dict[str, np.ndarray]):
     """Create feature extraction function with normalization."""
+
     def fn(image: np.ndarray) -> np.ndarray:
         features = extract_features(image)
         return normalize_features(features, param_stats["mean"], param_stats["std"])
+
     return fn
 
 
@@ -120,14 +122,24 @@ def main(args: argparse.Namespace) -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Data
-    train_dataset = HIDEDataset(args.data_dir, "train", (args.image_size, args.image_size))
+    train_dataset = HIDEDataset(
+        args.data_dir, "train", (args.image_size, args.image_size)
+    )
     val_dataset = HIDEDataset(args.data_dir, "val", (args.image_size, args.image_size))
 
     train_loader = DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=8, pin_memory=True
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=8,
+        pin_memory=True,
     )
     val_loader = DataLoader(
-        val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=8, pin_memory=True
+        val_dataset,
+        batch_size=args.batch_size,
+        shuffle=False,
+        num_workers=8,
+        pin_memory=True,
     )
 
     # Models
@@ -176,21 +188,25 @@ def main(args: argparse.Namespace) -> None:
             val_loader, model, loss_fn, mos_model, device
         )
 
-        print(f"Epoch {epoch}: train_loss={train_loss:.4f}, "
-              f"val_loss={val_loss:.4f}, PSNR={val_psnr:.2f}, SSIM={val_ssim:.4f}")
+        print(
+            f"Epoch {epoch}: train_loss={train_loss:.4f}, "
+            f"val_loss={val_loss:.4f}, PSNR={val_psnr:.2f}, SSIM={val_ssim:.4f}"
+        )
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             patience_counter = 0
             torch.save(
                 {"epoch": epoch, "state_dict": model.state_dict()},
-                output_dir / "best_model.pth"
+                output_dir / "best_model.pth",
             )
             print(f"  -> New best model saved")
         else:
             patience_counter += 1
             if patience_counter >= args.patience:
-                print(f"Early stopping after {args.patience} epochs without improvement")
+                print(
+                    f"Early stopping after {args.patience} epochs without improvement"
+                )
                 break
 
         scheduler.step()
@@ -202,8 +218,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train deblurring model")
     parser.add_argument("--data_dir", type=str, required=True, help="HIDE dataset path")
     parser.add_argument("--output_dir", type=str, default="checkpoints")
-    parser.add_argument("--mos_checkpoint", type=str, help="Path to MOS model checkpoint")
-    parser.add_argument("--param_stats", type=str, required=True, help="Path to param_stats.npz")
+    parser.add_argument(
+        "--mos_checkpoint", type=str, help="Path to MOS model checkpoint"
+    )
+    parser.add_argument(
+        "--param_stats", type=str, required=True, help="Path to param_stats.npz"
+    )
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--batch_size", type=int, default=28)
     parser.add_argument("--image_size", type=int, default=256)
@@ -212,9 +232,10 @@ if __name__ == "__main__":
     parser.add_argument("--w_mse", type=float, default=50.0)
     parser.add_argument("--w_ssim", type=float, default=0.00699)
     parser.add_argument("--w_mos", type=float, default=0.01792)
-    parser.add_argument("--mos_variant", type=str, default="ratio", choices=["ratio", "difference"])
+    parser.add_argument(
+        "--mos_variant", type=str, default="ratio", choices=["ratio", "difference"]
+    )
     parser.add_argument("--patience", type=int, default=10)
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
     main(args)
-

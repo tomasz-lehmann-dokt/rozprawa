@@ -39,9 +39,7 @@ def compute_ssim(output: torch.Tensor, target: torch.Tensor) -> float:
     ).item()
 
 
-def compute_metrics(
-    output: torch.Tensor, target: torch.Tensor
-) -> Tuple[float, float]:
+def compute_metrics(output: torch.Tensor, target: torch.Tensor) -> Tuple[float, float]:
     """
     Compute both PSNR and SSIM.
 
@@ -49,4 +47,3 @@ def compute_metrics(
         Tuple of (PSNR, SSIM).
     """
     return compute_psnr(output, target), compute_ssim(output, target)
-

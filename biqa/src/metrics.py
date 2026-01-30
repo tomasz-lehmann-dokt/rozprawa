@@ -62,5 +62,3 @@ def compute_range_metrics(
         results[(lower, upper)] = rmse
 
     return results
-
-

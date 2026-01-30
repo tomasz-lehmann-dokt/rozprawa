@@ -16,9 +16,7 @@ from torch.utils.data import Dataset
 import glob
 
 
-def augment_pair(
-    img1: np.ndarray, img2: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
+def augment_pair(img1: np.ndarray, img2: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """Apply random augmentation to image pair."""
     if random.random() > 0.5:
         img1 = cv2.flip(img1, 1)
@@ -41,13 +39,13 @@ def random_crop(
     cw, ch = crop_size
     x = random.randint(0, w - cw)
     y = random.randint(0, h - ch)
-    return img1[y:y+ch, x:x+cw, :], img2[y:y+ch, x:x+cw, :]
+    return img1[y : y + ch, x : x + cw, :], img2[y : y + ch, x : x + cw, :]
 
 
 class LowLightDataset(Dataset):
     """
     Combined dataset for low-light enhancement.
-    
+
     Supports LOL, LOL-v2 (Real_captured, Synthetic), and SID datasets
     with configurable SID exposure selection strategies.
     """
@@ -213,7 +211,9 @@ class LowLightDataset(Dataset):
 
         if low_img.shape != high_img.shape:
             # Resize to match
-            h, w = min(low_img.shape[0], high_img.shape[0]), min(low_img.shape[1], high_img.shape[1])
+            h, w = min(low_img.shape[0], high_img.shape[0]), min(
+                low_img.shape[1], high_img.shape[1]
+            )
             low_img = cv2.resize(low_img, (w, h))
             high_img = cv2.resize(high_img, (w, h))
 
@@ -227,5 +227,3 @@ class LowLightDataset(Dataset):
         high_tensor = torch.from_numpy(np.transpose(high_img, (2, 0, 1)))
 
         return low_tensor, high_tensor, low_path
-
-

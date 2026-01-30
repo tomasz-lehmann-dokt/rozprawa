@@ -5,7 +5,8 @@ Evaluates on test set with correlation metrics and per-range RMSE.
 
 Architectures:
 - ConvNeXt-MLP: ConvNeXt backbone + MLP parameter encoder
-- dual-Xception: Xception backbone + MLP parameter encoder
+- dual-Xception: Xception backbone (timm) + MLP parameter encoder
+- dual-Xception-v2: Two Xception backbones (pretrainedmodels), params as spatial maps
 """
 
 import argparse
@@ -20,7 +21,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from model import ConvNeXtMLP
-from model_xception import DualXception
+from model_xception import DualXception, DualXceptionV2
 from dataset import KonIQDataset
 from metrics import compute_correlation_metrics, compute_range_metrics
 
@@ -89,6 +90,8 @@ def main(args: argparse.Namespace) -> None:
         model = ConvNeXtMLP().to(device)
     elif args.model == "xception":
         model = DualXception().to(device)
+    elif args.model == "xception_v2":
+        model = DualXceptionV2().to(device)
     else:
         raise ValueError(f"Unknown model: {args.model}")
 
@@ -127,14 +130,22 @@ def main(args: argparse.Namespace) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate BIQA quality predictor")
-    parser.add_argument("--checkpoint", type=str, required=True, help="Model checkpoint")
+    parser.add_argument(
+        "--checkpoint", type=str, required=True, help="Model checkpoint"
+    )
     parser.add_argument("--csv_path", type=str, required=True, help="Path to KonIQ CSV")
-    parser.add_argument("--images_dir", type=str, required=True, help="Images directory")
-    parser.add_argument("--model", type=str, default="convnext", choices=["convnext", "xception"],
-                        help="Model architecture: convnext (ConvNeXt-MLP) or xception (dual-Xception)")
+    parser.add_argument(
+        "--images_dir", type=str, required=True, help="Images directory"
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="convnext",
+        choices=["convnext", "xception", "xception_v2"],
+        help="Model: convnext, xception (timm+MLP), xception_v2 (dual backbone)",
+    )
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--image_size", type=int, nargs=2, default=[512, 384])
     parser.add_argument("--output", type=str, default="test_results.csv")
 
     main(parser.parse_args())
-

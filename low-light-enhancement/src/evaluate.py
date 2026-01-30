@@ -49,10 +49,12 @@ def evaluate(
             ssim_sum += ssim
             count += 1
 
-            pbar.set_postfix(OrderedDict(
-                psnr=f"{psnr_sum / count:.2f}",
-                ssim=f"{ssim_sum / count:.4f}",
-            ))
+            pbar.set_postfix(
+                OrderedDict(
+                    psnr=f"{psnr_sum / count:.2f}",
+                    ssim=f"{ssim_sum / count:.4f}",
+                )
+            )
 
     return psnr_sum / count, ssim_sum / count
 
@@ -87,8 +89,24 @@ def main(args: argparse.Namespace) -> None:
     # Evaluate on each test set
     test_configs = [
         ("LOL-v1", {"use_lol": True, "use_lol_v2": False, "use_sid": False}),
-        ("LOL-v2-Real", {"use_lol": False, "use_lol_v2": True, "use_sid": False, "lol_v2_subsets": ["Real_captured"]}),
-        ("LOL-v2-Synth", {"use_lol": False, "use_lol_v2": True, "use_sid": False, "lol_v2_subsets": ["Synthetic"]}),
+        (
+            "LOL-v2-Real",
+            {
+                "use_lol": False,
+                "use_lol_v2": True,
+                "use_sid": False,
+                "lol_v2_subsets": ["Real_captured"],
+            },
+        ),
+        (
+            "LOL-v2-Synth",
+            {
+                "use_lol": False,
+                "use_lol_v2": True,
+                "use_sid": False,
+                "lol_v2_subsets": ["Synthetic"],
+            },
+        ),
     ]
 
     for name, config in test_configs:
@@ -120,7 +138,9 @@ def main(args: argparse.Namespace) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate Swin-UNet")
-    parser.add_argument("--checkpoint", type=str, required=True, help="Model checkpoint")
+    parser.add_argument(
+        "--checkpoint", type=str, required=True, help="Model checkpoint"
+    )
     parser.add_argument("--datasets_dir", type=str, required=True, help="Datasets root")
     parser.add_argument("--batch_size", type=int, default=1)
     parser.add_argument("--crop_size", type=int, default=256)
@@ -134,5 +154,3 @@ if __name__ == "__main__":
     parser.add_argument("--window_size", type=int, default=7)
 
     main(parser.parse_args())
-
-

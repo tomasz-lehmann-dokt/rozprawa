@@ -86,17 +86,20 @@ def extract_features(image: np.ndarray) -> np.ndarray:
 
     underexposed, overexposed = calculate_exposure(image)
 
-    return np.array([
-        calculate_brightness(image),
-        calculate_contrast(image),
-        calculate_sharpness(image),
-        calculate_colorfulness(image),
-        calculate_entropy(image),
-        calculate_edge_density(image),
-        calculate_saturation(image),
-        underexposed,
-        overexposed,
-    ], dtype=np.float32)
+    return np.array(
+        [
+            calculate_brightness(image),
+            calculate_contrast(image),
+            calculate_sharpness(image),
+            calculate_colorfulness(image),
+            calculate_entropy(image),
+            calculate_edge_density(image),
+            calculate_saturation(image),
+            underexposed,
+            overexposed,
+        ],
+        dtype=np.float32,
+    )
 
 
 def normalize_features(
@@ -106,4 +109,3 @@ def normalize_features(
 ) -> np.ndarray:
     """Z-score normalization."""
     return (features - mean) / (std + 1e-8)
-

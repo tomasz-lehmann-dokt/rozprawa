@@ -16,7 +16,7 @@ def _gaussian_window(window_size: int, sigma: float = 1.5) -> torch.Tensor:
     """Create 1D Gaussian kernel."""
     coords = torch.arange(window_size, dtype=torch.float32)
     coords -= window_size // 2
-    g = torch.exp(-(coords ** 2) / (2 * sigma ** 2))
+    g = torch.exp(-(coords**2) / (2 * sigma**2))
     return g / g.sum()
 
 
@@ -40,19 +40,20 @@ def ssim(
     mu1 = F.conv2d(pred, window, padding=0, groups=channels)
     mu2 = F.conv2d(target, window, padding=0, groups=channels)
 
-    mu1_sq = mu1 ** 2
-    mu2_sq = mu2 ** 2
+    mu1_sq = mu1**2
+    mu2_sq = mu2**2
     mu12 = mu1 * mu2
 
-    sigma1_sq = F.conv2d(pred ** 2, window, padding=0, groups=channels) - mu1_sq
-    sigma2_sq = F.conv2d(target ** 2, window, padding=0, groups=channels) - mu2_sq
+    sigma1_sq = F.conv2d(pred**2, window, padding=0, groups=channels) - mu1_sq
+    sigma2_sq = F.conv2d(target**2, window, padding=0, groups=channels) - mu2_sq
     sigma12 = F.conv2d(pred * target, window, padding=0, groups=channels) - mu12
 
     c1 = (0.01 * val_range) ** 2
     c2 = (0.03 * val_range) ** 2
 
-    ssim_map = ((2 * mu12 + c1) * (2 * sigma12 + c2)) / \
-               ((mu1_sq + mu2_sq + c1) * (sigma1_sq + sigma2_sq + c2))
+    ssim_map = ((2 * mu12 + c1) * (2 * sigma12 + c2)) / (
+        (mu1_sq + mu2_sq + c1) * (sigma1_sq + sigma2_sq + c2)
+    )
 
     return ssim_map.mean()
 
@@ -76,9 +77,7 @@ class PSNR(nn.Module):
         return -10 * torch.log10(mse)
 
 
-def compute_metrics(
-    output: torch.Tensor, target: torch.Tensor
-) -> Tuple[float, float]:
+def compute_metrics(output: torch.Tensor, target: torch.Tensor) -> Tuple[float, float]:
     """
     Compute PSNR and SSIM for output-target pair.
 
@@ -92,5 +91,3 @@ def compute_metrics(
     ssim_metric = SSIM()
 
     return psnr_metric(output, target).item(), ssim_metric(output, target).item()
-
-

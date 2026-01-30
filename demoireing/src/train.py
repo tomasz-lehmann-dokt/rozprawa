@@ -117,11 +117,13 @@ def validate(
             psnr_meter.update(psnr)
             ssim_meter.update(ssim)
 
-            pbar.set_postfix(OrderedDict(
-                loss=f"{loss_meter.avg:.4f}",
-                psnr=f"{psnr_meter.avg:.2f}",
-                ssim=f"{ssim_meter.avg:.4f}",
-            ))
+            pbar.set_postfix(
+                OrderedDict(
+                    loss=f"{loss_meter.avg:.4f}",
+                    psnr=f"{psnr_meter.avg:.2f}",
+                    ssim=f"{ssim_meter.avg:.4f}",
+                )
+            )
 
     return loss_meter.avg, psnr_meter.avg, ssim_meter.avg
 
@@ -194,19 +196,25 @@ def main(args: argparse.Namespace) -> None:
             tip_loader, model, criterion, device, epoch
         )
 
-        print(f"UHDM - Loss: {val_loss:.4f}, PSNR: {val_psnr:.2f}, SSIM: {val_ssim:.4f}")
-        print(f"TIP  - Loss: {tip_loss:.4f}, PSNR: {tip_psnr:.2f}, SSIM: {tip_ssim:.4f}")
+        print(
+            f"UHDM - Loss: {val_loss:.4f}, PSNR: {val_psnr:.2f}, SSIM: {val_ssim:.4f}"
+        )
+        print(
+            f"TIP  - Loss: {tip_loss:.4f}, PSNR: {tip_psnr:.2f}, SSIM: {tip_ssim:.4f}"
+        )
 
-        history.append({
-            "epoch": epoch,
-            "train_loss": train_loss,
-            "uhdm_loss": val_loss,
-            "uhdm_psnr": val_psnr,
-            "uhdm_ssim": val_ssim,
-            "tip_loss": tip_loss,
-            "tip_psnr": tip_psnr,
-            "tip_ssim": tip_ssim,
-        })
+        history.append(
+            {
+                "epoch": epoch,
+                "train_loss": train_loss,
+                "uhdm_loss": val_loss,
+                "uhdm_psnr": val_psnr,
+                "uhdm_ssim": val_ssim,
+                "tip_loss": tip_loss,
+                "tip_psnr": tip_psnr,
+                "tip_ssim": tip_ssim,
+            }
+        )
 
         if val_loss < best_loss:
             best_loss = val_loss
@@ -229,7 +237,9 @@ def main(args: argparse.Namespace) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train Attention U-Net for demoireing")
     parser.add_argument("--uhdm_dir", type=str, required=True, help="UHDM dataset root")
-    parser.add_argument("--tip_dir", type=str, required=True, help="TIP2018 dataset root")
+    parser.add_argument(
+        "--tip_dir", type=str, required=True, help="TIP2018 dataset root"
+    )
     parser.add_argument("--checkpoint_dir", type=str, default="checkpoints")
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--batch_size", type=int, default=32)
@@ -243,4 +253,3 @@ if __name__ == "__main__":
     parser.add_argument("--gpu", type=int, default=0)
 
     main(parser.parse_args())
-

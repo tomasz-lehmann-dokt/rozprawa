@@ -100,10 +100,12 @@ def validate(
             psnr_meter.update(psnr)
             ssim_meter.update(ssim)
 
-            pbar.set_postfix(OrderedDict(
-                psnr=f"{psnr_meter.avg:.2f}",
-                ssim=f"{ssim_meter.avg:.4f}",
-            ))
+            pbar.set_postfix(
+                OrderedDict(
+                    psnr=f"{psnr_meter.avg:.2f}",
+                    ssim=f"{ssim_meter.avg:.4f}",
+                )
+            )
 
     return psnr_meter.avg, ssim_meter.avg
 
@@ -169,14 +171,18 @@ def main(args: argparse.Namespace) -> None:
                 split="valid",
                 crop_size=(args.crop_size, args.crop_size),
                 datasets_dir=args.datasets_dir,
-                use_lol=True, use_lol_v2=False, use_sid=False,
+                use_lol=True,
+                use_lol_v2=False,
+                use_sid=False,
             )
         elif subset == "lol_v2_real":
             ds = LowLightDataset(
                 split="valid",
                 crop_size=(args.crop_size, args.crop_size),
                 datasets_dir=args.datasets_dir,
-                use_lol=False, use_lol_v2=True, use_sid=False,
+                use_lol=False,
+                use_lol_v2=True,
+                use_sid=False,
                 lol_v2_subsets=["Real_captured"],
             )
         else:
@@ -184,10 +190,14 @@ def main(args: argparse.Namespace) -> None:
                 split="valid",
                 crop_size=(args.crop_size, args.crop_size),
                 datasets_dir=args.datasets_dir,
-                use_lol=False, use_lol_v2=True, use_sid=False,
+                use_lol=False,
+                use_lol_v2=True,
+                use_sid=False,
                 lol_v2_subsets=["Synthetic"],
             )
-        val_loaders[subset] = DataLoader(ds, batch_size=args.batch_size, shuffle=False, num_workers=4)
+        val_loaders[subset] = DataLoader(
+            ds, batch_size=args.batch_size, shuffle=False, num_workers=4
+        )
 
     print(f"Train samples: {len(train_dataset)}")
     for name, loader in val_loaders.items():
@@ -197,7 +207,9 @@ def main(args: argparse.Namespace) -> None:
     history = []
 
     for epoch in range(1, args.epochs + 1):
-        train_loss = train_epoch(train_loader, model, criterion, optimizer, device, epoch)
+        train_loss = train_epoch(
+            train_loader, model, criterion, optimizer, device, epoch
+        )
 
         # Validate on each subset
         val_results = {}
@@ -206,13 +218,15 @@ def main(args: argparse.Namespace) -> None:
             psnr, ssim = validate(loader, model, device, desc=f"Val {name}")
             val_results[f"{name}_psnr"] = psnr
             val_results[f"{name}_ssim"] = ssim
-            total_loss += (1 - ssim)  # Use SSIM as proxy for loss
+            total_loss += 1 - ssim  # Use SSIM as proxy for loss
 
         avg_loss = total_loss / len(val_loaders)
 
         print(f"\nEpoch {epoch}:")
         for name in val_loaders:
-            print(f"  {name}: PSNR={val_results[f'{name}_psnr']:.2f}, SSIM={val_results[f'{name}_ssim']:.4f}")
+            print(
+                f"  {name}: PSNR={val_results[f'{name}_psnr']:.2f}, SSIM={val_results[f'{name}_ssim']:.4f}"
+            )
 
         history.append({"epoch": epoch, "train_loss": train_loss, **val_results})
 
@@ -236,8 +250,12 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Train Swin-UNet for low-light enhancement")
-    parser.add_argument("--datasets_dir", type=str, required=True, help="Datasets root directory")
+    parser = argparse.ArgumentParser(
+        description="Train Swin-UNet for low-light enhancement"
+    )
+    parser.add_argument(
+        "--datasets_dir", type=str, required=True, help="Datasets root directory"
+    )
     parser.add_argument("--checkpoint_dir", type=str, default="checkpoints")
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--batch_size", type=int, default=4)
@@ -257,9 +275,11 @@ if __name__ == "__main__":
 
     # SID configuration
     parser.add_argument("--use_sid", action="store_true")
-    parser.add_argument("--sid_selection", type=str, default="darkest",
-                        choices=["darkest", "three_darkest", "random"])
+    parser.add_argument(
+        "--sid_selection",
+        type=str,
+        default="darkest",
+        choices=["darkest", "three_darkest", "random"],
+    )
 
     main(parser.parse_args())
-
-

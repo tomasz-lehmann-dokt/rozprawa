@@ -150,4 +150,3 @@ class CombinedLoss(nn.Module):
             loss = 1.0 - 1.0 / (1.0 + torch.exp(-normalized))
 
         return loss.mean()
-

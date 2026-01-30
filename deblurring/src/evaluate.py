@@ -27,9 +27,11 @@ def load_param_stats(path: str) -> Dict[str, np.ndarray]:
 
 def create_feature_fn(param_stats: Dict[str, np.ndarray]):
     """Create feature extraction function with normalization."""
+
     def fn(image: np.ndarray) -> np.ndarray:
         features = extract_features(image)
         return normalize_features(features, param_stats["mean"], param_stats["std"])
+
     return fn
 
 
@@ -88,10 +90,11 @@ def main(args: argparse.Namespace) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate deblurring model")
     parser.add_argument("--data_dir", type=str, required=True, help="HIDE dataset path")
-    parser.add_argument("--checkpoint", type=str, required=True, help="Model checkpoint")
+    parser.add_argument(
+        "--checkpoint", type=str, required=True, help="Model checkpoint"
+    )
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--image_size", type=int, default=256)
     parser.add_argument("--dim", type=int, default=64)
     args = parser.parse_args()
     main(args)
-

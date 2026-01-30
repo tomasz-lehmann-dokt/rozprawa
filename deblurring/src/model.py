@@ -15,14 +15,20 @@ class ConvBlock(nn.Module):
     def __init__(self, in_channel: int, out_channel: int, strides: int = 1) -> None:
         super().__init__()
         self.block = nn.Sequential(
-            nn.Conv2d(in_channel, out_channel, kernel_size=3, stride=strides, padding=1),
+            nn.Conv2d(
+                in_channel, out_channel, kernel_size=3, stride=strides, padding=1
+            ),
             nn.BatchNorm2d(out_channel),
             nn.LeakyReLU(inplace=True),
-            nn.Conv2d(out_channel, out_channel, kernel_size=3, stride=strides, padding=1),
+            nn.Conv2d(
+                out_channel, out_channel, kernel_size=3, stride=strides, padding=1
+            ),
             nn.BatchNorm2d(out_channel),
             nn.LeakyReLU(inplace=True),
         )
-        self.conv11 = nn.Conv2d(in_channel, out_channel, kernel_size=1, stride=strides, padding=0)
+        self.conv11 = nn.Conv2d(
+            in_channel, out_channel, kernel_size=1, stride=strides, padding=0
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.block(x) + self.conv11(x)
@@ -35,7 +41,9 @@ class UpConv(nn.Module):
         super().__init__()
         self.up = nn.Sequential(
             nn.Upsample(scale_factor=2),
-            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.Conv2d(
+                in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True
+            ),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
         )
@@ -55,11 +63,15 @@ class AttentionBlock(nn.Module):
     def __init__(self, F_g: int, F_l: int, n_coefficients: int) -> None:
         super().__init__()
         self.W_gate = nn.Sequential(
-            nn.Conv2d(F_g, n_coefficients, kernel_size=1, stride=1, padding=0, bias=True),
+            nn.Conv2d(
+                F_g, n_coefficients, kernel_size=1, stride=1, padding=0, bias=True
+            ),
             nn.BatchNorm2d(n_coefficients),
         )
         self.W_x = nn.Sequential(
-            nn.Conv2d(F_l, n_coefficients, kernel_size=1, stride=1, padding=0, bias=True),
+            nn.Conv2d(
+                F_l, n_coefficients, kernel_size=1, stride=1, padding=0, bias=True
+            ),
             nn.BatchNorm2d(n_coefficients),
         )
         self.psi = nn.Sequential(
@@ -69,7 +81,9 @@ class AttentionBlock(nn.Module):
         )
         self.relu = nn.ReLU(inplace=True)
 
-    def forward(self, gate: torch.Tensor, skip_connection: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, gate: torch.Tensor, skip_connection: torch.Tensor
+    ) -> torch.Tensor:
         g1 = self.W_gate(gate)
         x1 = self.W_x(skip_connection)
         psi = self.relu(g1 + x1)
@@ -165,4 +179,3 @@ class AttentionUNet(nn.Module):
 def count_parameters(model: nn.Module) -> int:
     """Count trainable parameters."""
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
-

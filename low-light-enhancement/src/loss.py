@@ -25,7 +25,9 @@ def color_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     return torch.mean(torch.abs(diff))
 
 
-def psnr_loss(pred: torch.Tensor, target: torch.Tensor, eps: float = 1e-6) -> torch.Tensor:
+def psnr_loss(
+    pred: torch.Tensor, target: torch.Tensor, eps: float = 1e-6
+) -> torch.Tensor:
     """Inverted PSNR loss (to be minimized)."""
     mse = torch.clamp(F.mse_loss(pred, target), min=eps)
     psnr = 20.0 * torch.log10(1.0 / torch.sqrt(mse))
@@ -34,8 +36,12 @@ def psnr_loss(pred: torch.Tensor, target: torch.Tensor, eps: float = 1e-6) -> to
 
 def gradient_loss(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     """Sobel gradient consistency loss for edge preservation."""
-    sobel_x = torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=pred.dtype, device=pred.device)
-    sobel_y = torch.tensor([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=pred.dtype, device=pred.device)
+    sobel_x = torch.tensor(
+        [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=pred.dtype, device=pred.device
+    )
+    sobel_y = torch.tensor(
+        [[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=pred.dtype, device=pred.device
+    )
 
     sobel_x = sobel_x.view(1, 1, 3, 3).repeat(3, 1, 1, 1)
     sobel_y = sobel_y.view(1, 1, 3, 3).repeat(3, 1, 1, 1)
@@ -74,6 +80,7 @@ class MultiscaleSSIMLoss(nn.Module):
         super().__init__()
         try:
             from pytorch_msssim import msssim
+
             self.msssim = msssim
         except ImportError:
             self.msssim = None
@@ -106,7 +113,7 @@ class LPIPSLoss(nn.Module):
 class CombinedLoss(nn.Module):
     """
     Combined loss for low-light enhancement.
-    
+
     Aggregates smooth L1, LPIPS, MS-SSIM, PSNR, color, and gradient losses.
     """
 
@@ -157,5 +164,3 @@ class CombinedLoss(nn.Module):
         )
 
         return total
-
-

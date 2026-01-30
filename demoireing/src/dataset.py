@@ -19,7 +19,7 @@ import glob
 class DemoireDataset(Dataset):
     """
     Combined dataset for UHDM and TIP2018 moire removal benchmarks.
-    
+
     Implements RFBCS strategy: limits TIP2018 samples per epoch while using
     all UHDM samples, with random selection refreshed each epoch.
     """
@@ -123,13 +123,11 @@ class DemoireDataset(Dataset):
         moire_img = cv2.resize(moire_img, (self.image_size, self.image_size))
         clean_img = cv2.resize(clean_img, (self.image_size, self.image_size))
 
-        moire_tensor = torch.from_numpy(
-            np.transpose(moire_img, (2, 0, 1))
-        ).float() / 255.0
-        clean_tensor = torch.from_numpy(
-            np.transpose(clean_img, (2, 0, 1))
-        ).float() / 255.0
+        moire_tensor = (
+            torch.from_numpy(np.transpose(moire_img, (2, 0, 1))).float() / 255.0
+        )
+        clean_tensor = (
+            torch.from_numpy(np.transpose(clean_img, (2, 0, 1))).float() / 255.0
+        )
 
         return moire_tensor, clean_tensor, self.moire_paths[idx]
-
-

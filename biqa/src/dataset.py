@@ -72,14 +72,15 @@ class KonIQDataset(Dataset):
         elif split == "test":
             self.samples = self.samples[8058:]
 
-        self.transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Resize((299, 299)),
-            transforms.Normalize(
-                mean=[0.485, 0.456, 0.406],
-                std=[0.229, 0.224, 0.225]
-            ),
-        ])
+        self.transform = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Resize((299, 299)),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
+        )
 
         self.param_stats = param_stats
         if self.param_stats is None and split in ("train", "all"):
@@ -134,5 +135,3 @@ class KonIQDataset(Dataset):
         mos_tensor = torch.tensor(mos, dtype=torch.float32)
 
         return img_tensor, params_tensor, mos_tensor
-
-
